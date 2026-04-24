@@ -3,137 +3,220 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Task App</title>
-
+  <title>Document</title>
   <style>
     body {
-      font-family: Arial, sans-serif;
-      background: linear-gradient(to right, #1565c0, #42a5f5);
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
       display: flex;
       justify-content: center;
       align-items: center;
-      height: 100vh;
       margin: 0;
+      padding: 20px;
     }
 
     .container {
       background: white;
-      padding: 25px;
-      border-radius: 12px;
-      width: 350px;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+      border-radius: 20px;
+      padding: 30px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      width: 500px;
+      max-width: 100%;
     }
 
     h2 {
-      text-align: center;
-      margin-bottom: 20px;
-      color: #1565c0;
+      margin: 0 0 10px 0;
+      color: #333;
+      font-size: 28px;
     }
 
-    .input-group {
+    .subtitle {
+      color: #666;
+      margin-bottom: 25px;
+      font-size: 14px;
+    }
+
+    .input-wrapper {
       display: flex;
-      gap: 10px;
+      gap: 12px;
+      margin-bottom: 30px;
     }
 
-    input {
+    #taskInput {
       flex: 1;
-      padding: 10px;
-      border: 1px solid #ccc;
-      border-radius: 6px;
+      padding: 14px 18px;
+      border: 2px solid #e0e0e0;
+      border-radius: 12px;
+      font-size: 16px;
+      transition: all 0.3s ease;
       outline: none;
+      font-family: inherit;
     }
 
-    input:focus {
-      border-color: #1565c0;
+    #taskInput:focus {
+      border-color: #667eea;
+      box-shadow: 0 0 0 3px rgba(102,126,234,0.1);
     }
 
     button {
-      padding: 10px 15px;
-      border: none;
-      background: #1565c0;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       color: white;
-      border-radius: 6px;
+      border: none;
+      padding: 14px 28px;
+      border-radius: 12px;
+      font-size: 16px;
+      font-weight: 600;
       cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
     }
 
     button:hover {
-      background: #0d47a1;
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(102,126,234,0.4);
     }
 
-    ul {
+    button:active {
+      transform: translateY(0);
+    }
+
+    #taskList {
       list-style: none;
       padding: 0;
-      margin-top: 20px;
+      margin: 0;
+      max-height: 400px;
+      overflow-y: auto;
     }
 
     li {
-      background: #f4f6f9;
-      padding: 10px;
-      margin-bottom: 10px;
-      border-radius: 6px;
+      background: #f8f9fa;
+      margin: 10px 0;
+      padding: 15px 18px;
+      border-radius: 12px;
       display: flex;
-      justify-content: space-between;
       align-items: center;
+      justify-content: space-between;
+      transition: all 0.3s ease;
+      animation: slideIn 0.3s ease;
+    }
+
+    li:hover {
+      background: #e9ecef;
+      transform: translateX(5px);
+    }
+
+    .task-text {
+      flex: 1;
+      font-size: 16px;
+      color: #333;
       cursor: pointer;
+      transition: all 0.2s;
     }
 
-    li.completed {
+    .completed .task-text {
       text-decoration: line-through;
-      color: gray;
+      color: #999;
     }
 
-    li button {
-      background: red;
-      padding: 5px 10px;
-      font-size: 12px;
+    .delete-btn {
+      background: #dc3545;
+      padding: 6px 16px;
+      border-radius: 8px;
+      font-size: 14px;
     }
 
-    li button:hover {
-      background: darkred;
+    .delete-btn:hover {
+      background: #c82333;
+      box-shadow: 0 3px 10px rgba(220,53,69,0.3);
+    }
+
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateX(-20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+
+    .stats {
+      margin-top: 20px;
+      padding-top: 15px;
+      border-top: 2px solid #e0e0e0;
+      text-align: center;
+      color: #666;
+      font-size: 14px;
+      font-weight: 500;
     }
   </style>
 </head>
-
 <body>
-
-  <div class="container">
-    <h2>My Tasks</h2>
-
-    <div class="input-group">
-      <input type="text" id="taskInput" placeholder="Enter task">
-      <button onclick="addTask()">Add</button>
-    </div>
-
-    <ul id="taskList"></ul>
+<div class="container">
+  <h2>✨ Task Manager</h2>
+  <div class="subtitle">Stay organized, stay productive</div>
+  
+  <div class="input-wrapper">
+    <input type="text" id="taskInput" placeholder="Enter your task...">
+    <button onclick="addTask()">Add Task</button>
   </div>
+  
+  <ul id="taskList"></ul>
+  <div class="stats" id="taskStats">0 tasks</div>
+</div>
 
-  <script>
+<script>
+    function updateStats() {
+      let taskList = document.getElementById("taskList");
+      let count = taskList.children.length;
+      let stats = document.getElementById("taskStats");
+      stats.textContent = count + " " + (count === 1 ? "task" : "tasks");
+    }
+
     function addTask() {
       let input = document.getElementById("taskInput");
-
-      if (input.value.trim() === "") return;
-
+      if (input.value.trim() === "") {
+        input.style.borderColor = "#dc3545";
+        setTimeout(() => {
+          input.style.borderColor = "#e0e0e0";
+        }, 1000);
+        return;
+      }
+      
       let li = document.createElement("li");
-      li.textContent = input.value;
-
-      li.onclick = function () {
+      
+      let taskSpan = document.createElement("span");
+      taskSpan.className = "task-text";
+      taskSpan.textContent = input.value;
+      
+      taskSpan.onclick = function () {
         li.classList.toggle("completed");
       };
-
+      
       let delBtn = document.createElement("button");
       delBtn.textContent = "Delete";
-
-      delBtn.onclick = function (e) {
-        e.stopPropagation(); // prevents toggling when deleting
+      delBtn.className = "delete-btn";
+      delBtn.onclick = function () {
         li.remove();
+        updateStats();
       };
-
+      
+      li.appendChild(taskSpan);
       li.appendChild(delBtn);
       document.getElementById("taskList").appendChild(li);
-
+      
       input.value = "";
+      updateStats();
     }
-  </script>
-
+    
+    document.getElementById("taskInput").addEventListener("keypress", function(e) {
+      if (e.key === "Enter") {
+        addTask();
+      }
+    });
+    
+    updateStats();
+</script>
 </body>
 </html>
