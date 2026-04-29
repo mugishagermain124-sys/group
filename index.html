@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Rwandan Museum Puzzle Game</title>
+  <script src="https://unpkg.com/vue@3"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      background: #f4f4f4;
+    }
+
+    .game-container {
+      margin-top: 20px;
+    }
+
+    .grid {
+      display: grid;
+      
+      grid-template-columns: repeat(3, 100px);
+      grid-template-rows: repeat(3, 100px);
+      gap: 5px;
+      justify-content: center;
+    }
+
+    .tile {
+      width: 100px;
+      height: 100px;
+      background-size: 300px 300px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-weight: bold;
+      cursor: pointer;
+      border: 1px solid #333;
+      color: white;
+    }
+
+    .empty {
+      background: #ccc;
+      cursor: default;
+    }
+
+    button {
+      margin-top: 10px;
+      padding: 10px 20px;
+    }
+  </style>
+</head>
+<body>
+
+<div id="app">
+  <h1>🧩 Rwandan History Puzzle</h1>
+
+  <div class="game-container">
+    <div class="grid">
+      <div v-for="(tile, index) in tiles"
+           :key="index"
+           class="tile"
+           :class="{ empty: tile === 0 }"
+           :style="tileStyle(tile)"
+           @click="moveTile(index)">
+        {{ tile !== 0 ? tile : '' }}
+      </div>
+    </div>
+
+    <button @click="shuffleTiles">🔄 Restart</button>
+
+    <h3>Score: {{ score }}</h3>
+    <h3 v-if="won">🎉 You Win!</h3>
+
+    <p v-if="won">{{ currentFact }}</p>
+  </div>
+</div>
+
+<script>
+const app = Vue.createApp({
+  data() {
+    return {
+      tiles: [],
+      score: 0,
+      won: false,
+      imageIndex: 0,
+      images: [
+        "https://picsum.photos/300?1",
+        "https://picsum.photos/300?2",
+        "https://picsum.photos/300?3",
+        "https://picsum.photos/300?4",
+        "https://picsum.photos/300?5",
+        "https://picsum.photos/300?6",
+        "https://picsum.photos/300?7",
+        "https://picsum.photos/300?8",
+        "https://picsum.photos/300?9",
+        "https://picsum.photos/300?10"
+      ],
+      facts: [
+        "King Ruganzu Ndori was a powerful Rwandan king.",
+        "Agathe Uwilingiyimana was Rwanda’s first female prime minister.",
+        "King Mutara III helped modernize Rwanda.",
+        "Ndabaga was a legendary female warrior.",
+        "Rwanda has a rich cultural heritage.",
+        "Traditional dance is important in Rwanda.",
+        "Imigongo art is unique to Rwanda.",
+        "Rwanda is known as the land of a thousand hills.",
+        "The royal drum symbolizes power.",
+        "Rwandan history is full of inspiring leaders."
+      ]
+    }
+  },
+
+  computed: {
+    currentFact() {
+      return this.facts[this.imageIndex];
+    }
+  },
+
+  methods: {
+    init() {
+      this.tiles = [1,2,3,4,5,6,7,8,0];
+      this.shuffleTiles();
+    },
+
+    shuffleTiles() {
+      do {
+        this.tiles.sort(() => Math.random() - 0.5);
+      } while (!this.isSolvable(this.tiles));
+
+      this.won = false;
+    },
+
+    moveTile(index) {
+      const emptyIndex = this.tiles.indexOf(0);
+
+      const validMoves = [
+        index - 1,
+        index + 1,
+        index - 3,
+        index + 3
+      ];
+
+      if (validMoves.includes(emptyIndex)) {
+        [this.tiles[index], this.tiles[emptyIndex]] =
+        [this.tiles[emptyIndex], this.tiles[index]];
+
+        this.checkWin();
+      }
+    },
+
+    checkWin() {
+      const winState = [1,2,3,4,5,6,7,8,0];
+      if (JSON.stringify(this.tiles) === JSON.stringify(winState)) {
+        this.won = true;
+        this.score += 10;
+
+        if (this.imageIndex < this.images.length - 1) {
+          this.imageIndex++;
+        }
+      }
+    },
+
+    tileStyle(tile) {
+      if (tile === 0) return {};
+
+      const row = Math.floor((tile - 1) / 3);
+      const col = (tile - 1) % 3;
+
+      return {
+        backgroundImage: `url(${this.images[this.imageIndex]})`,
+        backgroundPosition: `-${col * 100}px -${row * 100}px`
+      };
+    },
+
+    isSolvable(arr) {
+      let inv = 0;
+      for (let i = 0; i < arr.length; i++) {
+        for (let j = i + 1; j < arr.length; j++) {
+          if (arr[i] && arr[j] && arr[i] > arr[j]) inv++;
+        }
+      }
+      return inv % 2 === 0;
+    }
+  },
+
+  mounted() {
+    this.init();
+  }
+});
+
+app.mount("#app");
+</script>
+
+</body>
+</html>
